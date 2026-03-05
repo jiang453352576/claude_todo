@@ -8,6 +8,7 @@ import os
 import uuid
 from typing import List, Optional
 from pathlib import Path
+from fastapi.responses import FileResponse
 
 # 创建FastAPI应用
 app = FastAPI(title="待办事项API", description="待办事项应用的后端API服务", version="1.0.0")
@@ -21,9 +22,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 # 静态文件服务 - 提供前端HTML/CSS/JS文件
 # 注意：静态文件目录设置为父目录，以便访问index.html和api.js
-app.mount("/", StaticFiles(directory="..", html=True), name="static")
+app.mount("/static", StaticFiles(directory=str(BASE_DIR)), name="static")
+
+# 首页返回 index.html
+@app.get("/")
+def serve_index():
+    return FileResponse(str(BASE_DIR / "index.html"))
 
 # 数据模型
 class TaskBase(BaseModel):
