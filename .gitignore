@@ -1,0 +1,18 @@
+# python相关
+__pycache__/
+
+# python虚拟环境
+.venv/
+venv/
+
+# IDE编译器相关
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude Code本地配置
+.claude/setting.local.json
+
+# Node
+node_modules/

@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单待办软件</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(to right, #4b6cb7, #182848);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .date-display {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .input-section {
+            padding: 25px 30px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        #taskInput {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        #taskInput:focus {
+            outline: none;
+            border-color: #4b6cb7;
+        }
+
+        #addBtn {
+            background: linear-gradient(to right, #4b6cb7, #182848);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #addBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(75, 108, 183, 0.3);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #182848;
+        }
+
+        .task-section {
+            padding: 0 30px 30px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            margin: 25px 0 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: #4b6cb7;
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-color: #c3cfe2;
+        }
+
+        .task-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .task-checkbox {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #4b6cb7;
+        }
+
+        .task-text {
+            font-size: 1.05rem;
+            color: #333;
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .task-text.completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .task-time {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .edit-btn {
+            color: #4b6cb7;
+        }
+
+        .delete-btn {
+            color: #e74c3c;
+        }
+
+        .edit-btn:hover {
+            background-color: rgba(75, 108, 183, 0.1);
+        }
+
+        .delete-btn:hover {
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #888;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+            background: #f8f9fa;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 15px;
+            }
+
+            header, .input-section, .task-section {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            #addBtn {
+                padding: 15px;
+                width: 100%;
+            }
+
+            .task-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .task-actions {
+                align-self: flex-end;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-tasks"></i> 每日待办</h1>
+            <div class="date-display" id="currentDate"></div>
+        </header>
+
+        <div class="input-section">
+            <div class="input-group">
+                <input type="text" id="taskInput" placeholder="请输入今天的任务..." maxlength="100" autocomplete="off">
+                <button id="addBtn"><i class="fas fa-plus"></i> 添加任务</button>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalTasks">0</div>
+                    <div>总任务</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="completedTasks">0</div>
+                    <div>已完成</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="pendingTasks">0</div>
+                    <div>待完成</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="task-section">
+            <h2 class="section-title"><i class="fas fa-list-check"></i> 任务列表</h2>
+
+            <ul class="task-list" id="taskList">
+                <!-- 任务将通过JavaScript动态添加 -->
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-clipboard-list"></i>
+                    <p>暂时没有任务，添加你的第一个任务吧！</p>
+                </div>
+            </ul>
+        </div>
+
+        <footer>
+            <p>© 2026 简单待办软件 | 数据保存在后端服务器中</p>
+        </footer>
+    </div>
+
+    <script type="module">
+        import { getTasks, createTask, updateTask, deleteTask, checkServerHealth, getTodayDateString, formatDateTime } from './api.js';
+
+        // 获取DOM元素
+        const taskInput = document.getElementById('taskInput');
+        const addBtn = document.getElementById('addBtn');
+        const taskList = document.getElementById('taskList');
+        const emptyState = document.getElementById('emptyState');
+        const currentDateEl = document.getElementById('currentDate');
+        const totalTasksEl = document.getElementById('totalTasks');
+        const completedTasksEl = document.getElementById('completedTasks');
+        const pendingTasksEl = document.getElementById('pendingTasks');
+
+        // 状态变量
+        let tasks = [];
+        let currentDate = getTodayDateString();
+
+        // 显示当前日期
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+            };
+            currentDateEl.textContent = now.toLocaleDateString('zh-CN', options);
+        }
+
+        // 从API加载任务
+        async function loadTasks() {
+            try {
+                tasks = await getTasks(currentDate);
+                renderTasks();
+                updateStats();
+            } catch (error) {
+                console.error('加载任务失败:', error);
+                alert('无法加载任务，请检查后端服务是否运行。');
+                tasks = [];
+                renderTasks();
+                updateStats();
+            }
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const total = tasks.length;
+            const completed = tasks.filter(task => task.completed).length;
+            const pending = total - completed;
+
+            totalTasksEl.textContent = total;
+            completedTasksEl.textContent = completed;
+            pendingTasksEl.textContent = pending;
+        }
+
+        // 渲染任务列表
+        function renderTasks() {
+            // 清空任务列表
+            taskList.innerHTML = '';
+
+            if (tasks.length === 0) {
+                taskList.appendChild(emptyState);
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            // 按创建时间排序（最新的在前面）
+            const sortedTasks = [...tasks].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            // 渲染每个任务
+            sortedTasks.forEach((task) => {
+                const taskItem = document.createElement('li');
+                taskItem.className = 'task-item';
+                taskItem.dataset.id = task.id;
+
+                // 格式化时间
+                const createdTime = new Date(task.createdAt);
+                const timeString = createdTime.toLocaleTimeString('zh-CN', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                taskItem.innerHTML = `
+                    <div class="task-content">
+                        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
+                        <div>
+                            <div class="task-text ${task.completed ? 'completed' : ''}">${escapeHtml(task.text)}</div>
+                            <div class="task-time">添加时间: ${timeString}</div>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-btn edit-btn" title="编辑任务">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete-btn" title="删除任务">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+
+                taskList.appendChild(taskItem);
+
+                // 添加事件监听器
+                const checkbox = taskItem.querySelector('.task-checkbox');
+                const editBtn = taskItem.querySelector('.edit-btn');
+                const deleteBtn = taskItem.querySelector('.delete-btn');
+                const taskText = taskItem.querySelector('.task-text');
+
+                // 切换完成状态
+                checkbox.addEventListener('change', async () => {
+                    try {
+                        const updatedTask = await updateTask(task.id, { completed: checkbox.checked });
+                        task.completed = updatedTask.completed;
+                        taskText.classList.toggle('completed', task.completed);
+                        updateStats();
+                    } catch (error) {
+                        console.error('更新任务状态失败:', error);
+                        alert('更新任务状态失败，请重试。');
+                        checkbox.checked = !checkbox.checked; // 恢复状态
+                    }
+                });
+
+                // 编辑任务
+                editBtn.addEventListener('click', async () => {
+                    const newText = prompt('编辑任务:', task.text);
+                    if (newText !== null && newText.trim() !== '') {
+                        try {
+                            const updatedTask = await updateTask(task.id, { text: newText.trim() });
+                            task.text = updatedTask.text;
+                            taskText.textContent = newText.trim();
+                        } catch (error) {
+                            console.error('编辑任务失败:', error);
+                            alert('编辑任务失败，请重试。');
+                        }
+                    }
+                });
+
+                // 删除任务
+                deleteBtn.addEventListener('click', async () => {
+                    if (confirm('确定要删除这个任务吗？')) {
+                        try {
+                            await deleteTask(task.id);
+                            tasks = tasks.filter(t => t.id !== task.id);
+                            renderTasks();
+                            updateStats();
+                        } catch (error) {
+                            console.error('删除任务失败:', error);
+                            alert('删除任务失败，请重试。');
+                        }
+                    }
+                });
+            });
+        }
+
+        // 添加新任务
+        async function addTask() {
+            const text = taskInput.value.trim();
+
+            if (text === '') {
+                alert('请输入任务内容！');
+                taskInput.focus();
+                return;
+            }
+
+            try {
+                const newTask = await createTask(text, false);
+                tasks.push(newTask);
+                taskInput.value = '';
+                renderTasks();
+                updateStats();
+                taskInput.focus();
+            } catch (error) {
+                console.error('添加任务失败:', error);
+                alert('添加任务失败，请检查后端服务。');
+            }
+        }
+
+        // HTML转义防止XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 检查后端服务健康状态
+        async function checkBackendHealth() {
+            const isHealthy = await checkServerHealth();
+            if (!isHealthy) {
+                console.warn('后端服务不可用，请确保后端正在运行。');
+            }
+        }
+
+        // 初始化应用
+        async function initApp() {
+            updateCurrentDate();
+            await checkBackendHealth();
+            await loadTasks();
+
+            // 添加任务事件监听
+            addBtn.addEventListener('click', addTask);
+            taskInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addTask();
+                }
+            });
+
+            // 示例任务（如果第一次使用且没有任务）
+            if (tasks.length === 0) {
+                const exampleTasks = [
+                    "阅读30分钟",
+                    "完成工作报告",
+                    "去健身房锻炼",
+                    "购买生活用品"
+                ];
+
+                // 询问是否添加示例任务
+                setTimeout(async () => {
+                    if (tasks.length === 0 && confirm('是否添加示例任务？')) {
+                        for (let i = 0; i < exampleTasks.length; i++) {
+                            try {
+                                const newTask = await createTask(exampleTasks[i], false);
+                                tasks.push(newTask);
+                                if (i === exampleTasks.length - 1) {
+                                    renderTasks();
+                                    updateStats();
+                                }
+                            } catch (error) {
+                                console.error('添加示例任务失败:', error);
+                                break;
+                            }
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>

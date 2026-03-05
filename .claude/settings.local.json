@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(npm create:*)",
+      "Bash(npx create-vite@latest:*)",
+      "Bash(node:*)",
+      "Bash(npm.cmd create:*)",
+      "Bash(npm.cmd install:*)",
+      "Bash(mkdir:*)",
+      "Bash(ls:*)",
+      "Bash(npm install:*)",
+      "Bash(python:*)",
+      "Bash(pip install:*)"
+    ]
+  }
+}
